@@ -1,8 +1,6 @@
-version: "3.8"
-
 services:
   postgres:
-    image: postgis/postgis:15-3.3
+    image: postgis/postgis:16-3.4  # ← Cambiado a versión compatible
     container_name: postgres
     restart: always
     environment:
@@ -21,7 +19,7 @@ services:
     container_name: mi_backend
     restart: always
     ports:
-      - "4000:4000"
+      - "3000:3000"
     env_file:
       - ./backend/.env
     depends_on:
@@ -35,3 +33,4 @@ volumes:
 networks:
   app_network:
     driver: bridge
+    
