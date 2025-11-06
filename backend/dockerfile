@@ -12,7 +12,7 @@ RUN npm install
 COPY . .
 
 # Exponer el puerto (ajústalo según el que uses en Express)
-EXPOSE 4000
+EXPOSE 3000
 
 # Comando para iniciar el servidor
 CMD ["npm", "start"]

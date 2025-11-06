@@ -1,25 +1,37 @@
-// backend/src/index.js (actualizado)
-const express = require('express');
-const cors = require('cors');
-const authRoutes = require('./routes/authRoutes');
-const orderRoutes = require('./routes/orderRoutes');
-const userRoutes = require('./routes/userRoutes'); // ← NUEVO
-const { authenticate } = require('./middleware/authMiddleware');
+import "./firebase.js"; // Inicializa Firebase Admin
+import express from "express";
+import cors from "cors";
+import userRoutes from "./routes/userRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js";
+import db from "./config/db.js";
 
 const app = express();
+const PORT = 3000;
 
-app.use(cors());
+// ✅ Configurar CORS para permitir peticiones desde Expo / emuladores / móviles
+app.use(
+  cors({
+    origin: "*", // Permitir cualquier origen (solo para desarrollo)
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
+// ✅ Middleware para parsear JSON
 app.use(express.json());
 
-app.use('/api/auth', authRoutes);
-app.use('/api/orders', authenticate, orderRoutes);
-app.use('/api/users', authenticate, userRoutes); // ← NUEVO
+// ✅ Conectar rutas
+app.use("/api/users", userRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/orders", orderRoutes);
 
-app.get('/api/test', (req, res) => {
-  res.json({ message: 'Backend funcionando correctamente!' });
+// ✅ Ruta de prueba para verificar conexión
+app.get("/api/test", (req, res) => {
+  res.json({ message: "Backend conectado correctamente ✅" });
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
+// ✅ Levantar servidor
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`✅ Servidor escuchando en http://0.0.0.0:${PORT}`);
 });

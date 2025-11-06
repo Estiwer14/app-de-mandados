@@ -1,70 +1,75 @@
-const User = require('../models/User');
-const { generateToken } = require('../utils/jwtUtils');
+import admin from "../firebase.js";
+import User from "../models/User.js";
 
-const register = async (req, res) => {
+//
+// REGISTRO CON FIREBASE AUTH (correo o número)
+//
+export const registerWithFirebase = async (req, res) => {
   try {
-    const { name, phone, email, role } = req.body;
+    const { idToken, name, phone } = req.body;
 
-    // Verificar si ya existe el usuario
-    const existingUser = await User.findByPhone(phone);
-    if (existingUser) {
-      return res.status(400).json({ error: 'Usuario ya registrado.' });
+    if (!idToken) {
+      return res
+        .status(400)
+        .json({ error: "Token de Firebase no proporcionado." });
     }
 
-    const newUser = await User.create({
-      name,
-      phone,
-      email,
-      role,
-      lat: null,
-      lng: null
+    // 1️⃣ Verificamos el token con Firebase Admin
+    const decoded = await admin.auth().verifyIdToken(idToken);
+    console.log("🔥 Firebase token verificado:", decoded);
+    const { uid, email } = decoded;
+
+    // 2️⃣ Creamos o actualizamos el usuario en la base de datos
+    const user = await User.upsertByFirebaseUid({
+      firebase_uid: uid,
+      name: name || decoded.name || "Sin nombre",
+      email: email || null,
+      phone: phone || null,
+      role: "cliente",
     });
 
-    const token = generateToken(newUser);
-
-    res.status(201).json({
-      message: 'Usuario registrado exitosamente.',
-      user: {
-        id: newUser.id,
-        name: newUser.name,
-        phone: newUser.phone,
-        role: newUser.role,
-        lat: newUser.lat,
-        lng: newUser.lng
-      },
-      token
+    // 3️⃣ Respuesta al cliente
+    res.json({
+      message: "Usuario registrado o actualizado correctamente.",
+      user,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Error en registro con Firebase:", error);
+    res.status(500).json({ error: "Error en el registro con Firebase." });
   }
 };
 
-const login = async (req, res) => {
+//
+// LOGIN CON FIREBASE AUTH
+//
+export const loginWithFirebase = async (req, res) => {
   try {
-    const { phone } = req.body;
+    const { idToken } = req.body;
 
-    const user = await User.findByPhone(phone);
-    if (!user) {
-      return res.status(400).json({ error: 'Usuario no encontrado.' });
+    if (!idToken) {
+      return res
+        .status(400)
+        .json({ error: "Token de Firebase no proporcionado." });
     }
 
-    const token = generateToken(user);
+    // 1️⃣ Validamos token
+    const decoded = await admin.auth().verifyIdToken(idToken);
+    const { uid } = decoded;
+
+    // 2️⃣ Buscamos al usuario en la base de datos
+    const user = await User.findByFirebaseUid(uid);
+    if (!user) {
+      return res
+        .status(404)
+        .json({ error: "Usuario no encontrado. Regístrate primero." });
+    }
 
     res.json({
-      message: 'Login exitoso.',
-      user: {
-        id: user.id,
-        name: user.name,
-        phone: user.phone,
-        role: user.role,
-        lat: user.lat,
-        lng: user.lng
-      },
-      token
+      message: "Inicio de sesión exitoso.",
+      user,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Error en login con Firebase:", error);
+    res.status(500).json({ error: "Error al iniciar sesión con Firebase." });
   }
 };
-
-module.exports = { register, login };

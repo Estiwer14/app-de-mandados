@@ -1,9 +1,13 @@
-const express = require('express');
-const { register, login } = require('../controllers/authController');
+import express from "express";
+import {
+  registerWithFirebase,
+  loginWithFirebase,
+} from "../controllers/authController.js";
 
 const router = express.Router();
 
-router.post('/register', register);
-router.post('/login', login);
+// Registro e inicio de sesión con Firebase
+router.post("/register", registerWithFirebase);
+router.post("/login", loginWithFirebase);
 
-module.exports = router;
+export default router;

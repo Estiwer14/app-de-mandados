@@ -1,5 +1,4 @@
-// backend/src/models/Location.js
-const pool = require('../config/db');
+import pool from "../config/db.js";
 
 class Location {
   // Guarda o actualiza la ubicación del usuario
@@ -39,4 +38,4 @@ class Location {
   }
 }
 
-module.exports = Location;
+export default Location;
