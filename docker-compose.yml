@@ -1,10 +1,10 @@
 services:
   postgres:
-    image: postgis/postgis:16-3.4  # ← Cambiado a versión compatible
+    image: postgis/postgis:16-3.4 # ← Cambiado a versión compatible
     container_name: postgres
     restart: always
     environment:
-      POSTGRES_USER: admin
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 41103996
       POSTGRES_DB: mandadito
     ports:
@@ -33,4 +33,3 @@ volumes:
 networks:
   app_network:
     driver: bridge
-    

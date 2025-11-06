@@ -1,16 +1,24 @@
-// backend/src/routes/userRoutes.js
-const express = require('express');
-const { authenticate } = require('../middleware/authMiddleware');
-const {
+import express from "express";
+import { authenticate } from "../middleware/authMiddleware.js";
+import {
   updateLocation,
   getProfile,
-  getNearbyMandaderos
-} = require('../controllers/userController');
+  getNearbyMandaderos,
+  createUserFromFirebase, // ✅ Asegúrate de que esté importado
+} from "../controllers/userController.js";
 
 const router = express.Router();
 
-router.get('/me', authenticate, getProfile);
-router.put('/location', authenticate, updateLocation);
-router.get('/nearby-mandaderos', authenticate, getNearbyMandaderos);
+// ✅ Nueva ruta: registrar usuario desde Firebase
+router.post("/firebase-register", createUserFromFirebase);
 
-module.exports = router;
+// ✅ Ruta protegida: obtener perfil del usuario autenticado
+router.get("/me", authenticate, getProfile);
+
+// ✅ Ruta protegida: actualizar ubicación del usuario
+router.put("/location", authenticate, updateLocation);
+
+// ✅ Ruta protegida: obtener mandaderos cercanos
+router.get("/nearby-mandaderos", authenticate, getNearbyMandaderos);
+
+export default router;
